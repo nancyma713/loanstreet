@@ -5,6 +5,12 @@ import passport from 'passport';
 import Loan from '../../models/Loan';
 import validateLoanInput from '../../validation/loans';
 
+router.get('/:id', (req, res) => {
+    Loan.findById(req.params.id)
+        .then(loan => res.json(loan))
+        .catch(err => res.status(404).json({ noloanfound: 'No loan found with that ID' }));
+});
+
 router.get('/', (req, res) => {
     Loan.find()
         .then(loans => res.json(loans))
@@ -27,14 +33,7 @@ router.get('/:userId', (req, res) => {
         .catch(err => res.status(404).json({ noloansfound: 'No loans found from that user' }));
 });
 
-router.get('/:id', (req, res) => {
-    Loan.findById(req.params.id)
-        .then(loan => res.json(loan))
-        .catch(err => res.status(404).json({ noloanfound: 'No loan found with that ID' }));
-});
-
 router.post('/new',
-    passport.authenticate('jwt', { session: false }),
     (req, res) => {
         const { errors, isValid } = validateLoanInput(req.body);
 
@@ -47,7 +46,7 @@ router.post('/new',
             interest_rate: req.body.interest_rate,
             loan_length: req.body.loan_length,
             monthly_payment: req.body.monthly_payment,
-            user_id: req.user.id
+            user_id: req.body.userId
         });
 
         newLoan.save()
@@ -56,10 +55,9 @@ router.post('/new',
 )
 
 router.put("/:id",
-    passport.authenticate('jwt', { session: false }),
     (req, res) => {
         Loan.findOneAndUpdate(
-            { _id: req.body.id },
+            { _id: req.params.id },
             {
                 amount: req.body.amount,
                 interest_rate: req.body.interest_rate,

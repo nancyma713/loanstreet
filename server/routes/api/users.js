@@ -38,16 +38,16 @@ router.post("/register", (req, res) => {
                             .then(user => {
                                 const payload = { id: user.id, email: user.email };
 
-                                jwt.sign(
-                                    payload,
-                                    keys.secretOrKey,
-                                    { expiresIn: 3600 },
-                                    (err, token) => {
-                                        res.json({
-                                            success: true,
-                                            token: "Bearer" + token
-                                        });
-                                    });
+                                // jwt.sign(
+                                //     payload,
+                                //     keys.secretOrKey,
+                                //     { expiresIn: 3600 },
+                                //     (err, token) => {
+                                //         res.json({
+                                //             success: true,
+                                //             token: "Bearer" + token
+                                //         });
+                                //     });
                             })
                             .catch(err => console.log(err));
                     })
@@ -78,17 +78,17 @@ router.post('/login', (req, res) => {
                     if (isMatch) {
                         const payload = { id: user.id, email: user.email };
 
-                        jwt.sign(
-                            payload,
-                            keys.secretOrKey,
-                            { expiresIn: 3600 },
-                            (err, token) => {
-                                res.json({
-                                    success: true,
-                                    token: "Bearer " + token
-                                });
-                            }
-                        );
+                        // jwt.sign(
+                        //     payload,
+                        //     keys.secretOrKey,
+                        //     { expiresIn: 3600 },
+                        //     (err, token) => {
+                        //         res.json({
+                        //             success: true,
+                        //             token: "Bearer " + token
+                        //         });
+                        //     }
+                        // );
                     } else {
                         errors.password = "Incorrect password";
                         return res.status(400).json(errors);
@@ -97,11 +97,11 @@ router.post('/login', (req, res) => {
         })
 })
 
-router.get('/current', passport.authenticate('jwt', { session: false }), (req, res) => {
-    res.json({
-        id: req.user.id,
-        email: req.user.email
-    });
-})
+router.get('/current', (req, res) => {
+    const email = req.body.email;
+    User.findOne({ email })
+        .then(user => res.json(user))
+        .catch(err => res.status(404).json({ nouserfound: 'No user found' }));
+});
 
 export default router;
